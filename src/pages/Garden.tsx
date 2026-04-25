@@ -41,10 +41,10 @@ const Garden = () => {
 
       <section className="mx-auto max-w-6xl">
         <h2 className="mb-2 text-center font-mono text-sm uppercase tracking-wider">
-          Our garden
+          Nosso jardim
         </h2>
         <p className="mb-12 text-center font-mono text-xs text-foreground/60">
-          A peek at the bouquets you've made
+          Os buquês que você já fez ✿
         </p>
 
         {error && (
@@ -55,17 +55,17 @@ const Garden = () => {
 
         {bouquets === null && (
           <p className="text-center font-mono text-xs text-foreground/50">
-            loading...
+            carregando...
           </p>
         )}
 
         {bouquets && bouquets.length === 0 && !error && (
           <div className="text-center">
             <p className="mb-6 font-mono text-xs text-foreground/60">
-              no bouquets yet — be the first to plant one
+              ainda não tem buquês — plante o primeiro 🌷
             </p>
-            <Link to="/bouquet?mode=color" className="db-btn-solid">
-              Build a bouquet
+            <Link to="/buque?modo=cor" className="db-btn-solid">
+              Montar um buquê
             </Link>
           </div>
         )}
@@ -76,11 +76,10 @@ const Garden = () => {
               <div key={b.id} className="flex flex-col items-center">
                 <BouquetRender
                   flowers={b.flowers}
-                  greens={b.greens}
                   bush={b.bush}
                   mode={b.mode}
                   seed={b.id}
-                  showDate={new Date(b.created_at).toLocaleDateString("en-US")}
+                  showDate={new Date(b.created_at).toLocaleDateString("pt-BR")}
                 />
               </div>
             ))}
@@ -89,7 +88,7 @@ const Garden = () => {
 
         <div className="mt-16 text-center">
           <Link to="/" className="db-link">
-            ← back home
+            ← voltar pro início
           </Link>
         </div>
       </section>

@@ -5,17 +5,17 @@ import { toast } from "sonner";
 import { SiteHeader } from "@/components/SiteHeader";
 import { BouquetRender } from "@/components/BouquetRender";
 import {
-  BUSHES,
   FLOWERS,
-  GREENS,
+  FLOWER_LABELS,
   bushUrl,
+  bushesFor,
   flowerUrl,
-  greenUrl,
+  type Flower,
   type Mode,
 } from "@/lib/digibouquet";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 
-type Step = "flowers" | "greens" | "bush" | "preview";
+type Step = "flowers" | "bush" | "preview";
 
 const MIN_FLOWERS = 6;
 const MAX_FLOWERS = 10;
@@ -24,11 +24,11 @@ const Bouquet = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const mode: Mode = params.get("mode") === "mono" ? "mono" : "color";
+  const bushOptions = bushesFor(mode);
 
   const [step, setStep] = useState<Step>("flowers");
   const [flowers, setFlowers] = useState<string[]>([]);
-  const [greens, setGreens] = useState<string[]>([]);
-  const [bush, setBush] = useState<string>(BUSHES[0]);
+  const [bush, setBush] = useState<string>(bushOptions[0]);
   const [saving, setSaving] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
 
@@ -37,7 +37,7 @@ const Bouquet = () => {
     [mode, flowers, bush],
   );
 
-  const today = new Date().toLocaleDateString("en-US");
+  const today = new Date().toLocaleDateString("pt-BR");
 
   const addFlower = (f: string) => {
     if (flowers.length >= MAX_FLOWERS) return;
@@ -52,10 +52,6 @@ const Bouquet = () => {
       return next;
     });
   };
-  const toggleGreen = (g: string) =>
-    setGreens((arr) =>
-      arr.includes(g) ? arr.filter((x) => x !== g) : [...arr, g],
-    );
 
   const canNextFromFlowers = flowers.length >= MIN_FLOWERS;
 
@@ -70,7 +66,7 @@ const Bouquet = () => {
     const { error } = await supabase.from("bouquets").insert({
       mode,
       flowers,
-      greens,
+      greens: [],
       bush,
     });
     setSaving(false);
@@ -78,8 +74,8 @@ const Bouquet = () => {
       toast.error("Erro ao salvar: " + error.message);
       return;
     }
-    toast.success("Buquê salvo no jardim 🌸");
-    navigate("/garden");
+    toast.success("Buquê plantado no jardim 🌸");
+    navigate("/jardim");
   };
 
   const handleDownload = async () => {
@@ -91,7 +87,7 @@ const Bouquet = () => {
         scale: 2,
       });
       const link = document.createElement("a");
-      link.download = `digibouquet-${Date.now()}.png`;
+      link.download = `buque-${Date.now()}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
     } catch (e) {
@@ -107,10 +103,11 @@ const Bouquet = () => {
       {step === "flowers" && (
         <section className="mx-auto max-w-4xl">
           <h2 className="mb-2 text-center font-mono text-sm uppercase tracking-wider">
-            Pick {MIN_FLOWERS} to {MAX_FLOWERS} blooms
+            Escolha de {MIN_FLOWERS} a {MAX_FLOWERS} flores
           </h2>
           <p className="mb-8 text-center font-mono text-xs text-foreground/60">
-            click to add · click again to add more · {flowers.length}/{MAX_FLOWERS}
+            clique para adicionar · clique de novo para repetir · {flowers.length}/
+            {MAX_FLOWERS}
           </p>
 
           <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6">
@@ -127,11 +124,12 @@ const Bouquet = () => {
                   }}
                   disabled={flowers.length >= MAX_FLOWERS}
                   className="group relative aspect-square transition-transform hover:scale-110 disabled:opacity-40 disabled:hover:scale-100"
-                  aria-label={`Add ${f}`}
+                  aria-label={`Adicionar ${FLOWER_LABELS[f as Flower]}`}
+                  title={FLOWER_LABELS[f as Flower]}
                 >
                   <img
                     src={flowerUrl(f, mode)}
-                    alt={f}
+                    alt={FLOWER_LABELS[f as Flower]}
                     className="h-full w-full object-contain"
                   />
                   {count > 0 && (
@@ -150,7 +148,7 @@ const Bouquet = () => {
               onClick={() => setFlowers([])}
               className="mx-auto mt-6 block font-mono text-xs uppercase text-foreground/50 underline underline-offset-4"
             >
-              clear all
+              limpar tudo
             </button>
           )}
 
@@ -159,68 +157,9 @@ const Bouquet = () => {
               type="button"
               className="db-btn-solid"
               disabled={!canNextFromFlowers}
-              onClick={() => setStep("greens")}
-            >
-              Next
-            </button>
-          </div>
-        </section>
-      )}
-
-      {step === "greens" && (
-        <section className="mx-auto max-w-3xl">
-          <h2 className="mb-2 text-center font-mono text-sm uppercase tracking-wider">
-            Pick your greens
-          </h2>
-          <p className="mb-8 text-center font-mono text-xs text-foreground/60">
-            optional · select any
-          </p>
-
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {GREENS.map((g) => {
-              const active = greens.includes(g);
-              return (
-                <button
-                  key={g}
-                  type="button"
-                  onClick={() => toggleGreen(g)}
-                  className={
-                    "aspect-square border p-4 transition-all " +
-                    (active
-                      ? "border-foreground bg-foreground/5 scale-105"
-                      : "border-transparent hover:border-foreground/40")
-                  }
-                >
-                  <img
-                    src={greenUrl(g, mode)}
-                    alt={g}
-                    onError={(e) =>
-                      ((e.currentTarget as HTMLImageElement).style.opacity = "0.3")
-                    }
-                    className="h-full w-full object-contain"
-                  />
-                  <span className="mt-1 block text-center font-mono text-[10px] uppercase">
-                    {g}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="mt-12 flex justify-center gap-3">
-            <button
-              type="button"
-              className="db-btn-outline"
-              onClick={() => setStep("flowers")}
-            >
-              Back
-            </button>
-            <button
-              type="button"
-              className="db-btn-solid"
               onClick={() => setStep("bush")}
             >
-              Next
+              Próximo
             </button>
           </div>
         </section>
@@ -228,12 +167,15 @@ const Bouquet = () => {
 
       {step === "bush" && (
         <section className="mx-auto max-w-3xl">
-          <h2 className="mb-8 text-center font-mono text-sm uppercase tracking-wider">
-            Pick a base
+          <h2 className="mb-2 text-center font-mono text-sm uppercase tracking-wider">
+            Escolha a folhagem
           </h2>
+          <p className="mb-8 text-center font-mono text-xs text-foreground/60">
+            a base verde do seu buquê
+          </p>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-            {BUSHES.map((b) => {
+            {bushOptions.map((b, i) => {
               const active = bush === b;
               return (
                 <button
@@ -249,14 +191,11 @@ const Bouquet = () => {
                 >
                   <img
                     src={bushUrl(b, mode)}
-                    alt={b}
-                    onError={(e) =>
-                      ((e.currentTarget as HTMLImageElement).style.opacity = "0.3")
-                    }
+                    alt={`folhagem ${i + 1}`}
                     className="aspect-square w-full object-contain"
                   />
                   <span className="mt-2 block text-center font-mono text-xs uppercase">
-                    {b}
+                    folhagem {i + 1}
                   </span>
                 </button>
               );
@@ -267,16 +206,16 @@ const Bouquet = () => {
             <button
               type="button"
               className="db-btn-outline"
-              onClick={() => setStep("greens")}
+              onClick={() => setStep("flowers")}
             >
-              Back
+              Voltar
             </button>
             <button
               type="button"
               className="db-btn-solid"
               onClick={() => setStep("preview")}
             >
-              Next
+              Próximo
             </button>
           </div>
         </section>
@@ -285,13 +224,13 @@ const Bouquet = () => {
       {step === "preview" && (
         <section className="mx-auto max-w-2xl">
           <h2 className="mb-8 text-center font-mono text-sm uppercase tracking-wider">
-            Your bouquet
+            Seu buquê
           </h2>
 
-          <div ref={previewRef} className="bg-background p-4">
+          <div className="bg-background p-4">
             <BouquetRender
+              ref={previewRef}
               flowers={flowers}
-              greens={greens}
               bush={bush}
               mode={mode}
               seed={seed}
@@ -305,14 +244,14 @@ const Bouquet = () => {
               className="db-btn-outline"
               onClick={() => setStep("bush")}
             >
-              Back
+              Voltar
             </button>
             <button
               type="button"
               className="db-btn-outline"
               onClick={handleDownload}
             >
-              Download
+              Baixar
             </button>
             <button
               type="button"
@@ -320,13 +259,13 @@ const Bouquet = () => {
               onClick={handleSave}
               disabled={saving}
             >
-              {saving ? "Saving..." : "Add to garden"}
+              {saving ? "Plantando..." : "Plantar no jardim"}
             </button>
           </div>
 
           <div className="mt-8 text-center">
             <Link to="/" className="db-link">
-              Start over
+              Recomeçar
             </Link>
           </div>
         </section>

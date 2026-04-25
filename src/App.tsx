@@ -18,6 +18,9 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/buque" element={<Bouquet />} />
+          <Route path="/jardim" element={<Garden />} />
+          {/* compat com URLs antigas */}
           <Route path="/bouquet" element={<Bouquet />} />
           <Route path="/garden" element={<Garden />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
