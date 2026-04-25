@@ -40,13 +40,13 @@ export function IntroAnimation() {
             transform: phase >= 1 ? "translateY(-8px)" : "translateY(0)",
           }}
         >
-          Para {RECIPIENT_NAME}
+          algo especial para você
         </p>
         <p
           className="mt-4 font-mono text-xs uppercase tracking-[0.3em] text-foreground/60 transition-opacity duration-700 sm:text-sm"
           style={{ opacity: phase >= 1 ? 1 : 0 }}
         >
-          com todo o carinho
+          feito com todo o carinho
         </p>
       </div>
     </div>
