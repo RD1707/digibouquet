@@ -6,7 +6,7 @@ import { SHOW_INTRO } from "@/lib/config";
 
 const Index = () => {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-4 py-10 sm:py-12">
+    <main className="flex min-h-screen flex-col items-center justify-center px-4 pb-10 pt-24 sm:pb-12 sm:pt-28">
       {SHOW_INTRO && <IntroAnimation />}
 
       <img
