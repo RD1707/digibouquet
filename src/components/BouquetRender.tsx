@@ -23,8 +23,8 @@ export const BouquetRender = forwardRef<HTMLDivElement, Props>(
     ref,
   ) {
     const placements = useMemo(
-      () => computePlacements(flowers, seed),
-      [flowers, seed],
+      () => computePlacements(flowers, seed, bush),
+      [flowers, seed, bush],
     );
 
     return (

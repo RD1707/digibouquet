@@ -77,12 +77,16 @@ export type Placement = {
   z: number;
 };
 
-export function computePlacements(flowers: string[], seed: string): Placement[] {
+export function computePlacements(flowers: string[], seed: string, bush?: string): Placement[] {
   const rand = seededRandom(seed);
   const n = flowers.length;
 
   const cx = 50;
-  const cy = 38;
+  let cy = 38;
+
+  if (bush === "bush-1" || bush === "bush-3") {
+    cy = 46;
+  }
 
   type Layer = { count: number; rPct: number; size: number; z: number };
   const layers: Layer[] = [];
