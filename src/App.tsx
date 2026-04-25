@@ -8,7 +8,6 @@ import Bouquet from "./pages/Bouquet.tsx";
 import Garden from "./pages/Garden.tsx";
 import BouquetDetail from "./pages/BouquetDetail.tsx";
 import NotFound from "./pages/NotFound.tsx";
-import { NavHud } from "./components/NavHud";
 
 const queryClient = new QueryClient();
 
@@ -18,7 +17,6 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <NavHud />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/buque" element={<Bouquet />} />
