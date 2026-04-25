@@ -19,7 +19,7 @@ const Index = () => {
         className="mb-2 text-center text-4xl text-foreground sm:text-5xl md:text-6xl lg:text-7xl"
         style={{ fontFamily: '"Lobster", cursive' }}
       >
-        Florzinhas pra você
+        para você, flores
       </h1>
       <p className="mb-8 mt-3 text-center font-mono text-xs uppercase tracking-wider text-foreground/80 sm:mb-10 sm:mt-4 sm:text-sm">
         flores lindas

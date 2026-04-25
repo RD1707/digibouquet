@@ -2,11 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Digibouquet design system — paleta creme inspirada no original */
-
 @layer base {
   :root {
-    --background: 53 50% 96%;          /* #fcfbf8 cream */
+    --background: 53 50% 96%;          
     --foreground: 0 0% 8%;
 
     --card: 53 50% 96%;

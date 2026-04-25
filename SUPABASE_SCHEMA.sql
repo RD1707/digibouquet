@@ -1,8 +1,3 @@
--- ============================================================
--- FLORZINHAS PRA VOCÊ — schema do banco de dados
--- Cole este arquivo inteiro no SQL Editor do Supabase e clique em RUN
--- ============================================================
-
 create table if not exists public.bouquets (
   id uuid primary key default gen_random_uuid(),
   mode text not null check (mode in ('color', 'mono')),

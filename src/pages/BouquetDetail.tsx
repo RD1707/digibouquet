@@ -38,7 +38,7 @@ const BouquetDetail = () => {
     const url = window.location.href;
     try {
       if (navigator.share) {
-        await navigator.share({ title: "Florzinhas pra você", url });
+        await navigator.share({ title: "para você, flores", url });
       } else {
         await navigator.clipboard.writeText(url);
         toast.success("Link copiado");

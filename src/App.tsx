@@ -22,10 +22,8 @@ const App = () => (
           <Route path="/buque" element={<Bouquet />} />
           <Route path="/jardim" element={<Garden />} />
           <Route path="/jardim/:id" element={<BouquetDetail />} />
-          {/* compat com URLs antigas */}
           <Route path="/bouquet" element={<Bouquet />} />
           <Route path="/garden" element={<Garden />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

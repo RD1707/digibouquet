@@ -1,6 +1,3 @@
-// Catálogo de assets do MeuJardim (hospedados em assets.pauwee.com)
-// As folhagens (greens) já fazem parte das imagens de bush + bush-top.
-
 export type Mode = "color" | "mono";
 
 export const FLOWERS = [
@@ -20,7 +17,6 @@ export const FLOWERS = [
 
 export type Flower = (typeof FLOWERS)[number];
 
-// Nomes em português para a UI
 export const FLOWER_LABELS: Record<Flower, string> = {
   orchid: "orquídea",
   tulip: "tulipa",
@@ -36,7 +32,6 @@ export const FLOWER_LABELS: Record<Flower, string> = {
   rose: "rosa",
 };
 
-// Modo cor tem 3 bases, mono tem 1 disponível
 export const BUSHES_COLOR = ["bush-1", "bush-2", "bush-3"] as const;
 export const BUSHES_MONO = ["bush-3"] as const;
 export type Bush = (typeof BUSHES_COLOR)[number];
@@ -59,7 +54,6 @@ export function bushesFor(mode: Mode): readonly string[] {
   return mode === "mono" ? BUSHES_MONO : BUSHES_COLOR;
 }
 
-// PRNG determinístico (FNV-1a + xorshift) — mesmo seed = mesma posição
 export function seededRandom(seed: string) {
   let h = 2166136261;
   for (let i = 0; i < seed.length; i++) {
@@ -78,24 +72,18 @@ export function seededRandom(seed: string) {
 export type Placement = {
   leftPct: number;
   topPct: number;
-  sizePct: number; // % do container (responsivo)
-  rotate: number;  // deg
+  sizePct: number; 
+  rotate: number;  
   z: number;
 };
 
-// Distribui as flores em formato de cabeça de buquê arredondada usando
-// uma combinação de phyllotaxis (espiral de Fibonacci) com camadas e
-// curvatura em cúpula. Tudo em % do container — 100% responsivo.
 export function computePlacements(flowers: string[], seed: string): Placement[] {
   const rand = seededRandom(seed);
   const n = flowers.length;
 
-  // Centro do buquê (em % do container) — um pouco acima do meio
   const cx = 50;
   const cy = 38;
 
-  // Define camadas com base em quantidade total
-  // [count, raioPct, sizePct, zBase]
   type Layer = { count: number; rPct: number; size: number; z: number };
   const layers: Layer[] = [];
 
@@ -132,27 +120,21 @@ export function computePlacements(flowers: string[], seed: string): Placement[] 
         leftPct = cx + (rand() - 0.5) * 2;
         topPct = cy + (rand() - 0.5) * 2;
       } else {
-        // Arco superior em cúpula: ângulo de -100° a +100° a partir do topo
         const t = count === 1 ? 0.5 : k / (count - 1);
-        // Pequeno jitter no parâmetro t para evitar simetria perfeita
         const tj = t + (rand() - 0.5) * 0.04;
         const angle = (tj - 0.5) * Math.PI * 1.15 - Math.PI / 2;
         radialAngle = angle;
 
-        // Elipse (mais larga que alta) com leve jitter
         const rxPct = rPct * 1.05 + (rand() - 0.5) * 2;
         const ryPct = rPct * 0.78 + (rand() - 0.5) * 1.5;
 
         leftPct = cx + Math.cos(angle) * rxPct;
         topPct = cy + Math.sin(angle) * ryPct;
 
-        // Curvatura em cúpula: flores das pontas descem um pouco
         const dome = Math.abs(Math.cos(angle)) * 3;
         topPct += dome;
       }
 
-      // Rotação radial: flores se inclinam pra fora do centro
-      // (no centro = quase 0, nas bordas = ±~25°)
       const radialTilt =
         rPct === 0 ? 0 : (radialAngle + Math.PI / 2) * (180 / Math.PI) * 0.35;
       const rotate = radialTilt + (rand() - 0.5) * 14;
@@ -171,10 +153,9 @@ export function computePlacements(flowers: string[], seed: string): Placement[] 
   return placements;
 }
 
-// Gera um buquê aleatório (usado no "modo surpresa")
 export function randomBouquet(mode: Mode): { flowers: string[]; bush: string } {
   const bushes = bushesFor(mode);
-  const count = 6 + Math.floor(Math.random() * 5); // 6..10
+  const count = 6 + Math.floor(Math.random() * 5); 
   const flowers: string[] = [];
   for (let i = 0; i < count; i++) {
     flowers.push(FLOWERS[Math.floor(Math.random() * FLOWERS.length)]);

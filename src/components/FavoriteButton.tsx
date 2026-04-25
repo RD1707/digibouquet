@@ -45,7 +45,7 @@ export function FavoriteButton({ id }: { id: string }) {
     <button
       type="button"
       onClick={toggle}
-      aria-label={active ? "Remover dos favoritos" : "Favoritar"}
+      aria-label={active ? "remover dos favoritos" : "Favoritar"}
       className="font-mono text-xs uppercase tracking-wider text-foreground/60 transition-colors hover:text-foreground"
     >
       {active ? "♥ favorito" : "♡ favoritar"}
