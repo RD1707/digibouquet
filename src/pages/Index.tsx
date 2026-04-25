@@ -35,14 +35,12 @@ const Index = () => {
           Em preto e branco
         </Link>
       </div>
-      <div className="mt-4 flex flex-col items-center gap-3 sm:flex-row sm:gap-6">
-        <Link to="/buque?mode=color&surprise=1" className="db-link">
-          Modo surpresa
-        </Link>
+      <div className="mt-4 flex justify-center">
         <Link to="/jardim" className="db-link">
           Ver o jardim
         </Link>
       </div>
+
 
       <div className="mt-12 sm:mt-16">
         <DaysCounter />
