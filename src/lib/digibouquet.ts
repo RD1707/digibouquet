@@ -59,7 +59,7 @@ export function bushesFor(mode: Mode): readonly string[] {
   return mode === "mono" ? BUSHES_MONO : BUSHES_COLOR;
 }
 
-// Posições determinísticas para layout do buquê (seed por id/conteúdo)
+// PRNG determinístico (FNV-1a + xorshift) — mesmo seed = mesma posição
 export function seededRandom(seed: string) {
   let h = 2166136261;
   for (let i = 0; i < seed.length; i++) {
@@ -78,75 +78,107 @@ export function seededRandom(seed: string) {
 export type Placement = {
   leftPct: number;
   topPct: number;
-  size: number; // px
-  rotate: number; // deg
+  sizePct: number; // % do container (responsivo)
+  rotate: number;  // deg
   z: number;
 };
 
-// Distribui as flores em formato de cabeça de buquê arredondada acima do bush.
-// Usamos múltiplas camadas (anéis) para criar densidade e profundidade,
-// alternando flores grandes ao centro/baixo e menores nas bordas/cima.
+// Distribui as flores em formato de cabeça de buquê arredondada usando
+// uma combinação de phyllotaxis (espiral de Fibonacci) com camadas e
+// curvatura em cúpula. Tudo em % do container — 100% responsivo.
 export function computePlacements(flowers: string[], seed: string): Placement[] {
   const rand = seededRandom(seed);
   const n = flowers.length;
 
   // Centro do buquê (em % do container) — um pouco acima do meio
   const cx = 50;
-  const cy = 36;
+  const cy = 38;
 
-  // Distribuição em camadas concêntricas: 1 flor central + anéis
-  // Definimos quantas flores cabem por camada
-  const layers: number[] = [];
-  let remaining = n;
-  // Camada 0 (centro): 1 flor (se houver pelo menos 4 no total)
-  if (n >= 4) {
-    layers.push(1);
-    remaining -= 1;
+  // Define camadas com base em quantidade total
+  // [count, raioPct, sizePct, zBase]
+  type Layer = { count: number; rPct: number; size: number; z: number };
+  const layers: Layer[] = [];
+
+  if (n <= 6) {
+    layers.push({ count: 1, rPct: 0,  size: 36, z: 30 });
+    const mid = Math.min(n - 1, 5);
+    if (mid > 0) layers.push({ count: mid, rPct: 17, size: 30, z: 20 });
+    const out = n - 1 - mid;
+    if (out > 0) layers.push({ count: out, rPct: 28, size: 24, z: 10 });
+  } else if (n <= 8) {
+    layers.push({ count: 1, rPct: 0,  size: 34, z: 30 });
+    layers.push({ count: 4, rPct: 16, size: 29, z: 20 });
+    layers.push({ count: n - 5, rPct: 27, size: 23, z: 10 });
+  } else {
+    // 9 ou 10
+    layers.push({ count: 1, rPct: 0,  size: 32, z: 30 });
+    layers.push({ count: 5, rPct: 16, size: 28, z: 20 });
+    layers.push({ count: n - 6, rPct: 27, size: 22, z: 10 });
   }
-  // Camada 1 (interna): até 5
-  const inner = Math.min(remaining, Math.max(3, Math.ceil(n * 0.4)));
-  layers.push(inner);
-  remaining -= inner;
-  // Camada 2 (externa): o restante
-  if (remaining > 0) layers.push(remaining);
 
   const placements: Placement[] = [];
   let idx = 0;
 
-  layers.forEach((count, layer) => {
-    // Raios crescentes por camada (em % do container)
-    const baseRx = layer === 0 ? 0 : layer === 1 ? 18 : 32;
-    const baseRy = layer === 0 ? 0 : layer === 1 ? 12 : 20;
-    // Tamanho: centro maior, externos menores para dar perspectiva
-    const baseSize = layer === 0 ? 150 : layer === 1 ? 130 : 110;
+  layers.forEach((layer) => {
+    const { count, rPct, size, z } = layer;
 
     for (let k = 0; k < count; k++) {
       let leftPct: number;
       let topPct: number;
-      if (layer === 0) {
-        leftPct = cx + (rand() - 0.5) * 4;
-        topPct = cy + (rand() - 0.5) * 4;
+      let radialAngle = 0;
+
+      if (rPct === 0) {
+        // Centro
+        leftPct = cx + (rand() - 0.5) * 2;
+        topPct = cy + (rand() - 0.5) * 2;
       } else {
-        // Ângulo em arco superior (-110° a +110°) para formato de cúpula
+        // Arco superior em cúpula: ângulo de -100° a +100° a partir do topo
         const t = count === 1 ? 0.5 : k / (count - 1);
-        const angle = (t - 0.5) * Math.PI * 1.22 - Math.PI / 2;
-        const rx = baseRx + rand() * 4;
-        const ry = baseRy + rand() * 3;
-        leftPct = cx + Math.cos(angle) * rx + (rand() - 0.5) * 3;
-        topPct = cy + Math.sin(angle) * ry + (rand() - 0.5) * 3;
+        // Pequeno jitter no parâmetro t para evitar simetria perfeita
+        const tj = t + (rand() - 0.5) * 0.04;
+        const angle = (tj - 0.5) * Math.PI * 1.15 - Math.PI / 2;
+        radialAngle = angle;
+
+        // Elipse (mais larga que alta) com leve jitter
+        const rxPct = rPct * 1.05 + (rand() - 0.5) * 2;
+        const ryPct = rPct * 0.78 + (rand() - 0.5) * 1.5;
+
+        leftPct = cx + Math.cos(angle) * rxPct;
+        topPct = cy + Math.sin(angle) * ryPct;
+
+        // Curvatura em cúpula: flores das pontas descem um pouco
+        const dome = Math.abs(Math.cos(angle)) * 3;
+        topPct += dome;
       }
+
+      // Rotação radial: flores se inclinam pra fora do centro
+      // (no centro = quase 0, nas bordas = ±~25°)
+      const radialTilt =
+        rPct === 0 ? 0 : (radialAngle + Math.PI / 2) * (180 / Math.PI) * 0.35;
+      const rotate = radialTilt + (rand() - 0.5) * 14;
 
       placements.push({
         leftPct,
         topPct,
-        size: baseSize + (rand() - 0.5) * 20,
-        rotate: (rand() - 0.5) * 36,
-        // Camadas mais externas atrás, centro na frente
-        z: (2 - layer) * 10 + idx,
+        sizePct: size + (rand() - 0.5) * 3,
+        rotate,
+        z: z + idx,
       });
       idx++;
     }
   });
 
   return placements;
+}
+
+// Gera um buquê aleatório (usado no "modo surpresa")
+export function randomBouquet(mode: Mode): { flowers: string[]; bush: string } {
+  const bushes = bushesFor(mode);
+  const count = 6 + Math.floor(Math.random() * 5); // 6..10
+  const flowers: string[] = [];
+  for (let i = 0; i < count; i++) {
+    flowers.push(FLOWERS[Math.floor(Math.random() * FLOWERS.length)]);
+  }
+  const bush = bushes[Math.floor(Math.random() * bushes.length)];
+  return { flowers, bush };
 }

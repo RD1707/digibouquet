@@ -15,5 +15,6 @@ export type BouquetRow = {
   flowers: string[];
   greens: string[];
   bush: string;
+  title: string | null;
   created_at: string;
 };
