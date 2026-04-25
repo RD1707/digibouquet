@@ -1,48 +1,39 @@
 import { Link } from "react-router-dom";
-import { HERO_PEONY, LOGO_URL } from "@/lib/digibouquet";
+import { HERO_PEONY } from "@/lib/digibouquet";
 
 const Index = () => {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
       <img
         src={HERO_PEONY}
-        alt="peony flower"
-        className="mb-2 h-32 w-32 object-contain"
-      />
-      <img
-        src={LOGO_URL}
-        alt="digibouquet"
-        className="mb-6 h-24 w-auto object-contain md:h-32"
+        alt="peônia"
+        className="mb-4 h-32 w-32 object-contain"
       />
 
-      <p className="mb-10 text-center font-mono text-sm uppercase tracking-wider text-foreground/80">
-        beautiful flowers
+      <h1 className="mb-2 text-center font-serif text-5xl italic text-foreground md:text-6xl"
+          style={{ fontFamily: '"Brush Script MT", "Lucida Handwriting", cursive' }}>
+        Florzinhas pra você
+      </h1>
+      <p className="mb-10 mt-4 text-center font-mono text-sm uppercase tracking-wider text-foreground/80">
+        flores lindas
         <br />
-        delivered digitally
+        feitas com amor ✿
       </p>
 
       <div className="flex flex-col items-center gap-4">
-        <Link to="/bouquet?mode=color" className="db-btn-solid">
-          Build a bouquet
+        <Link to="/buque?modo=cor" className="db-btn-solid">
+          Montar um buquê
         </Link>
-        <Link to="/bouquet?mode=mono" className="db-btn-outline">
-          Build it in black and white
+        <Link to="/buque?modo=mono" className="db-btn-outline">
+          Em preto e branco
         </Link>
-        <Link to="/garden" className="db-link mt-2">
-          View garden
+        <Link to="/jardim" className="db-link mt-2">
+          Ver o jardim
         </Link>
       </div>
 
-      <p className="mt-16 font-mono text-xs uppercase tracking-wider text-foreground/40">
-        made with love · inspired by{" "}
-        <a
-          href="https://digibouquet.vercel.app"
-          target="_blank"
-          rel="noreferrer"
-          className="underline"
-        >
-          digibouquet
-        </a>
+      <p className="mt-16 text-center font-mono text-xs uppercase tracking-wider text-foreground/40">
+        feito com carinho 💌
       </p>
     </main>
   );
