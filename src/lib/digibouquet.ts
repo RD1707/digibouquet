@@ -85,7 +85,7 @@ export function computePlacements(flowers: string[], seed: string, bush?: string
   let cy = 38;
 
   if (bush === "bush-1" || bush === "bush-3") {
-    cy = 46;
+    cy = 54;
   }
 
   type Layer = { count: number; rPct: number; size: number; z: number };
