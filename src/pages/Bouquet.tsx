@@ -74,7 +74,7 @@ const Bouquet = () => {
       toast.error("Erro ao salvar: " + error.message);
       return;
     }
-    toast.success("Buquê plantado no jardim 🌸");
+    toast.success("Buquê plantado no jardim");
     navigate("/jardim");
   };
 
@@ -83,7 +83,7 @@ const Bouquet = () => {
     const t = toast.loading("Preparando imagem...");
     try {
       await downloadBouquetPng(previewRef.current);
-      toast.success("Buquê baixado 💐", { id: t });
+      toast.success("Buquê baixado", { id: t });
     } catch (e) {
       toast.error("Erro ao gerar imagem", { id: t });
       console.error(e);

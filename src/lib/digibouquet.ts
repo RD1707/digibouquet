@@ -83,23 +83,70 @@ export type Placement = {
   z: number;
 };
 
-// Distribui as flores em "cabeça" de buquê arredondada acima do bush
+// Distribui as flores em formato de cabeça de buquê arredondada acima do bush.
+// Usamos múltiplas camadas (anéis) para criar densidade e profundidade,
+// alternando flores grandes ao centro/baixo e menores nas bordas/cima.
 export function computePlacements(flowers: string[], seed: string): Placement[] {
   const rand = seededRandom(seed);
   const n = flowers.length;
-  return flowers.map((_, i) => {
-    const t = (i + 0.5) / n;
-    const angle = t * Math.PI - Math.PI / 2; // -90° a +90°
-    const rx = 32 + rand() * 6; // raio horizontal %
-    const ry = 18 + rand() * 4; // raio vertical %
-    const cx = 50 + Math.cos(angle) * rx;
-    const cy = 38 + Math.sin(angle) * ry;
-    return {
-      leftPct: cx + (rand() - 0.5) * 6,
-      topPct: cy + (rand() - 0.5) * 6,
-      size: 80 + rand() * 50,
-      rotate: (rand() - 0.5) * 30,
-      z: i,
-    };
+
+  // Centro do buquê (em % do container) — um pouco acima do meio
+  const cx = 50;
+  const cy = 36;
+
+  // Distribuição em camadas concêntricas: 1 flor central + anéis
+  // Definimos quantas flores cabem por camada
+  const layers: number[] = [];
+  let remaining = n;
+  // Camada 0 (centro): 1 flor (se houver pelo menos 4 no total)
+  if (n >= 4) {
+    layers.push(1);
+    remaining -= 1;
+  }
+  // Camada 1 (interna): até 5
+  const inner = Math.min(remaining, Math.max(3, Math.ceil(n * 0.4)));
+  layers.push(inner);
+  remaining -= inner;
+  // Camada 2 (externa): o restante
+  if (remaining > 0) layers.push(remaining);
+
+  const placements: Placement[] = [];
+  let idx = 0;
+
+  layers.forEach((count, layer) => {
+    // Raios crescentes por camada (em % do container)
+    const baseRx = layer === 0 ? 0 : layer === 1 ? 18 : 32;
+    const baseRy = layer === 0 ? 0 : layer === 1 ? 12 : 20;
+    // Tamanho: centro maior, externos menores para dar perspectiva
+    const baseSize = layer === 0 ? 150 : layer === 1 ? 130 : 110;
+
+    for (let k = 0; k < count; k++) {
+      let leftPct: number;
+      let topPct: number;
+      if (layer === 0) {
+        leftPct = cx + (rand() - 0.5) * 4;
+        topPct = cy + (rand() - 0.5) * 4;
+      } else {
+        // Ângulo em arco superior (-110° a +110°) para formato de cúpula
+        const t = count === 1 ? 0.5 : k / (count - 1);
+        const angle = (t - 0.5) * Math.PI * 1.22 - Math.PI / 2;
+        const rx = baseRx + rand() * 4;
+        const ry = baseRy + rand() * 3;
+        leftPct = cx + Math.cos(angle) * rx + (rand() - 0.5) * 3;
+        topPct = cy + Math.sin(angle) * ry + (rand() - 0.5) * 3;
+      }
+
+      placements.push({
+        leftPct,
+        topPct,
+        size: baseSize + (rand() - 0.5) * 20,
+        rotate: (rand() - 0.5) * 36,
+        // Camadas mais externas atrás, centro na frente
+        z: (2 - layer) * 10 + idx,
+      });
+      idx++;
+    }
   });
+
+  return placements;
 }
