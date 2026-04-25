@@ -1,50 +1,19 @@
 import { Link } from "react-router-dom";
 import { IntroAnimation } from "@/components/IntroAnimation";
 import { DaysCounter } from "@/components/DaysCounter";
-import { flowerUrl } from "@/lib/digibouquet";
+import { HERO_PEONY } from "@/lib/digibouquet";
 import { SHOW_INTRO } from "@/lib/config";
-
-const HERO_FLOWERS = [
-  "rose",
-  "peony",
-  "tulip",
-  "ranunculus",
-  "daisy",
-  "anemone",
-  "dahlia",
-] as const;
 
 const Index = () => {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-4 py-10 sm:py-12">
       {SHOW_INTRO && <IntroAnimation />}
 
-      <div className="mb-4 flex items-end justify-center gap-1 sm:mb-6 sm:gap-2">
-        {HERO_FLOWERS.map((f, i) => {
-          // tamanhos alternados pra dar movimento, peônia central maior
-          const isCenter = i === Math.floor(HERO_FLOWERS.length / 2);
-          const size = isCenter
-            ? "h-20 w-20 sm:h-28 sm:w-28"
-            : i % 2 === 0
-              ? "h-14 w-14 sm:h-20 sm:w-20"
-              : "h-16 w-16 sm:h-24 sm:w-24";
-          // leve rotação radial pra parecer um buquezinho
-          const center = (HERO_FLOWERS.length - 1) / 2;
-          const rot = (i - center) * 8;
-          const translateY = isCenter ? 0 : Math.abs(i - center) * 4;
-          return (
-            <img
-              key={f}
-              src={flowerUrl(f, "color")}
-              alt={f}
-              className={`${size} object-contain transition-transform duration-500`}
-              style={{
-                transform: `rotate(${rot}deg) translateY(${translateY}px)`,
-              }}
-            />
-          );
-        })}
-      </div>
+      <img
+        src={HERO_PEONY}
+        alt="peônia"
+        className="mb-2 h-24 w-24 object-contain sm:mb-4 sm:h-32 sm:w-32"
+      />
 
       <h1
         className="mb-2 text-center text-4xl text-foreground sm:text-5xl md:text-6xl lg:text-7xl"
