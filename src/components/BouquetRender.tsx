@@ -38,7 +38,7 @@ export const BouquetRender = forwardRef<HTMLDivElement, Props>(
         <img
           src={bushUrl(bush, mode)}
           alt=""
-          crossOrigin="anonymous"
+          data-bouquet-img="bush"
           className="absolute inset-0 h-full w-full select-none object-contain"
           draggable={false}
         />
@@ -51,7 +51,7 @@ export const BouquetRender = forwardRef<HTMLDivElement, Props>(
               key={`${f}-${i}`}
               src={flowerUrl(f, mode)}
               alt={f}
-              crossOrigin="anonymous"
+              data-bouquet-img="flower"
               draggable={false}
               className="pointer-events-none absolute select-none"
               style={{
@@ -69,7 +69,7 @@ export const BouquetRender = forwardRef<HTMLDivElement, Props>(
         <img
           src={bushTopUrl(bush, mode)}
           alt=""
-          crossOrigin="anonymous"
+          data-bouquet-img="bush-top"
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).style.display = "none";
           }}
