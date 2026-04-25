@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { downloadBouquetPng } from "@/lib/downloadBouquet";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ import {
   bushUrl,
   bushesFor,
   flowerUrl,
+  randomBouquet,
   type Flower,
   type Mode,
 } from "@/lib/digibouquet";
@@ -25,12 +26,28 @@ const Bouquet = () => {
   const navigate = useNavigate();
   const mode: Mode = params.get("mode") === "mono" ? "mono" : "color";
   const bushOptions = bushesFor(mode);
+  const surprise = params.get("surprise") === "1";
 
   const [step, setStep] = useState<Step>("flowers");
   const [flowers, setFlowers] = useState<string[]>([]);
   const [bush, setBush] = useState<string>(bushOptions[0]);
+  const [title, setTitle] = useState("");
   const [saving, setSaving] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
+
+  // Modo surpresa: gera buquê aleatório e pula direto pro preview
+  useEffect(() => {
+    if (!surprise) return;
+    const r = randomBouquet(mode);
+    setFlowers(r.flowers);
+    setBush(r.bush);
+    setStep("preview");
+    // limpa o param sem reload
+    const url = new URL(window.location.href);
+    url.searchParams.delete("surprise");
+    window.history.replaceState({}, "", url.toString());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const seed = useMemo(
     () => `${mode}-${flowers.join(",")}-${bush}`,
@@ -55,6 +72,12 @@ const Bouquet = () => {
 
   const canNextFromFlowers = flowers.length >= MIN_FLOWERS;
 
+  const reroll = () => {
+    const r = randomBouquet(mode);
+    setFlowers(r.flowers);
+    setBush(r.bush);
+  };
+
   const handleSave = async () => {
     if (!isSupabaseConfigured) {
       toast.error(
@@ -68,6 +91,7 @@ const Bouquet = () => {
       flowers,
       greens: [],
       bush,
+      title: title.trim() || null,
     });
     setSaving(false);
     if (error) {
@@ -91,20 +115,20 @@ const Bouquet = () => {
   };
 
   return (
-    <main className="min-h-screen px-4 pb-20">
+    <main className="min-h-screen px-4 pb-16 sm:pb-20">
       <SiteHeader />
 
       {step === "flowers" && (
         <section className="mx-auto max-w-4xl">
-          <h2 className="mb-2 text-center font-mono text-sm uppercase tracking-wider">
+          <h2 className="mb-2 text-center font-mono text-xs uppercase tracking-wider sm:text-sm">
             Escolha de {MIN_FLOWERS} a {MAX_FLOWERS} flores
           </h2>
-          <p className="mb-8 text-center font-mono text-xs text-foreground/60">
-            clique para adicionar · clique de novo para repetir · {flowers.length}/
+          <p className="mb-6 text-center font-mono text-[10px] text-foreground/60 sm:mb-8 sm:text-xs">
+            toque pra adicionar · toque longo/clique direito remove · {flowers.length}/
             {MAX_FLOWERS}
           </p>
 
-          <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6">
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4 md:grid-cols-6">
             {FLOWERS.map((f) => {
               const count = flowers.filter((x) => x === f).length;
               return (
@@ -116,8 +140,8 @@ const Bouquet = () => {
                     e.preventDefault();
                     removeLastOf(f);
                   }}
-                  disabled={flowers.length >= MAX_FLOWERS}
-                  className="group relative aspect-square transition-transform hover:scale-110 disabled:opacity-40 disabled:hover:scale-100"
+                  disabled={flowers.length >= MAX_FLOWERS && count === 0}
+                  className="group relative aspect-square touch-manipulation transition-transform active:scale-95 hover:scale-110 disabled:opacity-40 disabled:hover:scale-100"
                   aria-label={`Adicionar ${FLOWER_LABELS[f as Flower]}`}
                   title={FLOWER_LABELS[f as Flower]}
                 >
@@ -136,20 +160,29 @@ const Bouquet = () => {
             })}
           </div>
 
-          {flowers.length > 0 && (
+          <div className="mt-5 flex flex-col items-center gap-3 sm:mt-6 sm:flex-row sm:justify-center sm:gap-6">
+            {flowers.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setFlowers([])}
+                className="font-mono text-[10px] uppercase text-foreground/50 underline underline-offset-4 sm:text-xs"
+              >
+                limpar tudo
+              </button>
+            )}
             <button
               type="button"
-              onClick={() => setFlowers([])}
-              className="mx-auto mt-6 block font-mono text-xs uppercase text-foreground/50 underline underline-offset-4"
+              onClick={reroll}
+              className="font-mono text-[10px] uppercase text-foreground/50 underline underline-offset-4 sm:text-xs"
             >
-              limpar tudo
+              modo surpresa
             </button>
-          )}
+          </div>
 
-          <div className="mt-12 flex justify-center">
+          <div className="mt-10 flex justify-center sm:mt-12">
             <button
               type="button"
-              className="db-btn-solid"
+              className="db-btn-solid w-full max-w-xs sm:w-auto"
               disabled={!canNextFromFlowers}
               onClick={() => setStep("bush")}
             >
@@ -161,14 +194,14 @@ const Bouquet = () => {
 
       {step === "bush" && (
         <section className="mx-auto max-w-3xl">
-          <h2 className="mb-2 text-center font-mono text-sm uppercase tracking-wider">
+          <h2 className="mb-2 text-center font-mono text-xs uppercase tracking-wider sm:text-sm">
             Escolha a folhagem
           </h2>
-          <p className="mb-8 text-center font-mono text-xs text-foreground/60">
+          <p className="mb-6 text-center font-mono text-[10px] text-foreground/60 sm:mb-8 sm:text-xs">
             a base verde do seu buquê
           </p>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
             {bushOptions.map((b, i) => {
               const active = bush === b;
               return (
@@ -177,7 +210,7 @@ const Bouquet = () => {
                   type="button"
                   onClick={() => setBush(b)}
                   className={
-                    "border p-4 transition-all " +
+                    "border p-3 transition-all sm:p-4 " +
                     (active
                       ? "border-foreground bg-foreground/5"
                       : "border-transparent hover:border-foreground/40")
@@ -188,7 +221,7 @@ const Bouquet = () => {
                     alt={`folhagem ${i + 1}`}
                     className="aspect-square w-full object-contain"
                   />
-                  <span className="mt-2 block text-center font-mono text-xs uppercase">
+                  <span className="mt-2 block text-center font-mono text-[10px] uppercase sm:text-xs">
                     folhagem {i + 1}
                   </span>
                 </button>
@@ -196,7 +229,7 @@ const Bouquet = () => {
             })}
           </div>
 
-          <div className="mt-12 flex justify-center gap-3">
+          <div className="mt-10 flex flex-col-reverse justify-center gap-3 sm:mt-12 sm:flex-row">
             <button
               type="button"
               className="db-btn-outline"
@@ -217,11 +250,11 @@ const Bouquet = () => {
 
       {step === "preview" && (
         <section className="mx-auto max-w-2xl">
-          <h2 className="mb-8 text-center font-mono text-sm uppercase tracking-wider">
+          <h2 className="mb-6 text-center font-mono text-xs uppercase tracking-wider sm:mb-8 sm:text-sm">
             Seu buquê
           </h2>
 
-          <div className="bg-background p-4">
+          <div className="bg-background p-2 sm:p-4">
             <BouquetRender
               ref={previewRef}
               flowers={flowers}
@@ -229,16 +262,38 @@ const Bouquet = () => {
               mode={mode}
               seed={seed}
               showDate={today}
+              title={title.trim() || null}
             />
           </div>
 
-          <div className="mt-12 flex flex-wrap justify-center gap-3">
+          <div className="mx-auto mt-6 max-w-sm">
+            <label className="mb-2 block text-center font-mono text-[10px] uppercase tracking-wider text-foreground/60 sm:text-xs">
+              Título (opcional)
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value.slice(0, 40))}
+              placeholder="ex: 1 ano juntos"
+              maxLength={40}
+              className="w-full border border-foreground/20 bg-transparent px-3 py-2 text-center font-mono text-xs uppercase tracking-wider focus:border-foreground focus:outline-none"
+            />
+          </div>
+
+          <div className="mt-10 flex flex-col flex-wrap justify-center gap-3 sm:mt-12 sm:flex-row">
             <button
               type="button"
               className="db-btn-outline"
               onClick={() => setStep("bush")}
             >
               Voltar
+            </button>
+            <button
+              type="button"
+              className="db-btn-outline"
+              onClick={reroll}
+            >
+              Surpresa
             </button>
             <button
               type="button"
