@@ -14,11 +14,12 @@ interface Props {
   seed: string;
   className?: string;
   showDate?: string | null;
+  title?: string | null;
 }
 
 export const BouquetRender = forwardRef<HTMLDivElement, Props>(
   function BouquetRender(
-    { flowers, bush, mode, seed, className, showDate },
+    { flowers, bush, mode, seed, className, showDate, title },
     ref,
   ) {
     const placements = useMemo(
@@ -57,7 +58,7 @@ export const BouquetRender = forwardRef<HTMLDivElement, Props>(
               style={{
                 left: `${p.leftPct}%`,
                 top: `${p.topPct}%`,
-                width: `${p.size}px`,
+                width: `${p.sizePct}%`,
                 transform: `translate(-50%, -50%) rotate(${p.rotate}deg)`,
                 zIndex: 10 + p.z,
               }}
@@ -78,9 +79,18 @@ export const BouquetRender = forwardRef<HTMLDivElement, Props>(
           draggable={false}
         />
 
+        {title && (
+          <div
+            className="absolute bottom-2 left-2 max-w-[60%] truncate font-mono text-[10px] uppercase tracking-wider text-foreground/70 sm:text-xs"
+            style={{ zIndex: 200 }}
+          >
+            {title}
+          </div>
+        )}
+
         {showDate && (
           <div
-            className="absolute bottom-2 right-2 font-mono text-xs text-foreground/60"
+            className="absolute bottom-2 right-2 font-mono text-[10px] text-foreground/60 sm:text-xs"
             style={{ zIndex: 200 }}
           >
             {showDate}
