@@ -44,7 +44,7 @@ const Garden = () => {
           Nosso jardim
         </h2>
         <p className="mb-12 text-center font-mono text-xs text-foreground/60">
-          Os buquês que você já fez ✿
+          Os buquês que você já fez
         </p>
 
         {error && (
@@ -62,7 +62,7 @@ const Garden = () => {
         {bouquets && bouquets.length === 0 && !error && (
           <div className="text-center">
             <p className="mb-6 font-mono text-xs text-foreground/60">
-              ainda não tem buquês — plante o primeiro 🌷
+              ainda não tem buquês — plante o primeiro
             </p>
             <Link to="/buque?modo=cor" className="db-btn-solid">
               Montar um buquê

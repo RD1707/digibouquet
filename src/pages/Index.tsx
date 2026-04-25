@@ -10,14 +10,14 @@ const Index = () => {
         className="mb-4 h-32 w-32 object-contain"
       />
 
-      <h1 className="mb-2 text-center font-serif text-5xl italic text-foreground md:text-6xl"
-          style={{ fontFamily: '"Brush Script MT", "Lucida Handwriting", cursive' }}>
+      <h1 className="mb-2 text-center text-5xl text-foreground md:text-6xl"
+          style={{ fontFamily: '"Lobster", cursive' }}>
         Florzinhas pra você
       </h1>
       <p className="mb-10 mt-4 text-center font-mono text-sm uppercase tracking-wider text-foreground/80">
         flores lindas
         <br />
-        feitas com amor ✿
+        feitas com amor
       </p>
 
       <div className="flex flex-col items-center gap-4">
@@ -33,7 +33,7 @@ const Index = () => {
       </div>
 
       <p className="mt-16 text-center font-mono text-xs uppercase tracking-wider text-foreground/40">
-        feito com carinho 💌
+        feito com carinho
       </p>
     </main>
   );
