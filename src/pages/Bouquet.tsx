@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import html2canvas from "html2canvas";
+import { downloadBouquetPng } from "@/lib/downloadBouquet";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/SiteHeader";
 import { BouquetRender } from "@/components/BouquetRender";
@@ -80,18 +80,12 @@ const Bouquet = () => {
 
   const handleDownload = async () => {
     if (!previewRef.current) return;
+    const t = toast.loading("Preparando imagem...");
     try {
-      const canvas = await html2canvas(previewRef.current, {
-        backgroundColor: "#fcfbf8",
-        useCORS: true,
-        scale: 2,
-      });
-      const link = document.createElement("a");
-      link.download = `buque-${Date.now()}.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
+      await downloadBouquetPng(previewRef.current);
+      toast.success("Buquê baixado 💐", { id: t });
     } catch (e) {
-      toast.error("Erro ao gerar imagem");
+      toast.error("Erro ao gerar imagem", { id: t });
       console.error(e);
     }
   };
